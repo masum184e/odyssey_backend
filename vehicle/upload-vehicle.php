@@ -27,15 +27,15 @@
     
     $driverId = $row['driver_id'];
 
-    $licensePlate = $_POST['licensePlate'] ?? '';
+    $licensePlate = $_POST['license_plate_number'] ?? '';
     $mileage = $_POST['mileage'] ?? 0;
-    $seats = $_POST['numberOfSeats'] ?? 0;
-    $chasisNumber = $_POST['chasisNumber'] ?? '';
+    $seats = $_POST['chasis_number'] ?? 0;
+    $chasisNumber = $_POST['chasis_number'] ?? '';
     $model = $_POST['model'] ?? '';
     $type = $_POST['type'] ?? '';
     $year = $_POST['year'] ?? '';
     $color = $_POST['color'] ?? '';
-    $ownerMobile = $_POST['ownerMobileNumber'] ?? '';
+    $ownerMobile = $_POST['owner_mobile_number'] ?? '';
 
     if (empty($licensePlate) || empty($mileage) || empty($seats) || empty($chasisNumber) || empty($model) || empty($type) || empty($year) || empty($color) || empty($ownerMobile)) {
         echo json_encode(["status" => "false", "message" => "All fields are required."]);
@@ -83,18 +83,19 @@
         }
     }
 
-    $mainImage = uploadVehicleImage($_FILES['mainImage'], 'Main Image', $uploadDir);
-    $frontImage = uploadVehicleImage($_FILES['frontImage'], 'Front Image', $uploadDir);
-    $backImage = uploadVehicleImage($_FILES['backImage'], 'Back Image', $uploadDir);
-    $leftImage = uploadVehicleImage($_FILES['leftImage'], 'Left Image', $uploadDir);
-    $interiorImage = uploadVehicleImage($_FILES['interiorImage'], 'Interior Image', $uploadDir);
-    $rightImage = uploadVehicleImage($_FILES['rightImage'], 'Right Image', $uploadDir);
-
+    $mainImage = uploadVehicleImage($_FILES['main_image'], 'main_image', $uploadDir);
+    $frontImage = uploadVehicleImage($_FILES['front_image'], 'front_image', $uploadDir);
+    $backImage = uploadVehicleImage($_FILES['back_image'], 'back_image', $uploadDir);
+    $leftImage = uploadVehicleImage($_FILES['left_image'], 'left_image', $uploadDir);
+    $interiorImage = uploadVehicleImage($_FILES['interior_image'], 'interior_image', $uploadDir);
+    $rightImage = uploadVehicleImage($_FILES['right_image'], 'right_image', $uploadDir);
+    $ownerImage = uploadVehicleImage($_FILES['owner_image'], 'owner_image', $uploadDir);
+    
     $sql = "INSERT INTO vehicles (driver_id, license_plate_number, mileage, number_of_seats, chasis_number, model, type, year, color, owner_mobile_number, owner_image, main_image, front_image, back_image, left_image, interior_image, right_image) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("isdisdssssssssss", $driverId, $licensePlate, $mileage, $seats, $chasisNumber, $model, $type, $year, $color, $ownerMobile, $mainImage, $frontImage, $backImage, $leftImage, $interiorImage, $rightImage);
+    $stmt->bind_param("isdisdsssssssssss", $driverId, $licensePlate, $mileage, $seats, $chasisNumber, $model, $type, $year, $color, $ownerMobile, $ownerImage, $mainImage, $frontImage, $backImage, $leftImage, $interiorImage, $rightImage);
 
     if ($stmt->execute()) {
         echo json_encode(["status" => "true", "message" => "Vehicle added successfully."]);
