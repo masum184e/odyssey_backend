@@ -6,15 +6,14 @@ use Firebase\JWT\Key;
 
 function create_jwt($user_email, $role) {
     $issuedAt = time();
-    $expirationTime = $issuedAt + EXPIRATION_TIME; // Token valid for 1 hour
+    $expirationTime = $issuedAt + EXPIRATION_TIME;
     $payload = [
-        'iat' => $issuedAt,          // Issued at
-        'exp' => $expirationTime,    // Expiration time
-        'userEmail' => $user_email,
+        'iat' => $issuedAt, 
+        'exp' => $expirationTime,
+        'email' => $user_email,
         'role' => $role
     ];
 
-    // Encode the payload to create the JWT
     $jwt = JWT::encode($payload, JWT_SECRET_KEY, 'HS256');
     return $jwt;
 }
