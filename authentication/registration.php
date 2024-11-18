@@ -44,7 +44,7 @@
 
     if (mysqli_stmt_execute($stmt)) {
         try {
-            echo json_encode(["status" => "true", "message" => ucfirst($role) . " account created successfully!", "token" => create_jwt($email)]);
+            echo json_encode(["status" => "true", "message" => ucfirst($role) . " account created successfully!", "token" => create_jwt($email, $role)]);
         } catch (Exception $e) {
             echo json_encode(["status" => "false", "message" => "Error generating token."]);
         }

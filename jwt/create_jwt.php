@@ -4,13 +4,14 @@ require './../vendor/autoload.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-function create_jwt($user_email) {
+function create_jwt($user_email, $role) {
     $issuedAt = time();
     $expirationTime = $issuedAt + EXPIRATION_TIME; // Token valid for 1 hour
     $payload = [
         'iat' => $issuedAt,          // Issued at
         'exp' => $expirationTime,    // Expiration time
-        'userEmail' => $user_email
+        'userEmail' => $user_email,
+        'role' => $role
     ];
 
     // Encode the payload to create the JWT
