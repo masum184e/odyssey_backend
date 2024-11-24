@@ -4,6 +4,18 @@ header('Content-Type: application/json');
 require './../database_connection.php';
 require './../config.php';
 
+$baseUrl = "http://16.0.0.157/odyssey_backend/uploads/vehicles/"; // Base URL for images
+
+function formatVehicleData($vehicle, $baseUrl) {
+    // Append the base URL to image paths
+    foreach (['owner_image', 'main_image', 'front_image', 'back_image', 'left_image', 'interior_image', 'right_image'] as $imageField) {
+        if (isset($vehicle[$imageField]) && !empty($vehicle[$imageField])) {
+            $vehicle[$imageField] = $baseUrl . $vehicle[$imageField];
+        }
+    }
+    return $vehicle;
+}
+
 // Check if vehicleId is provided in the query string
 $vehicleId = isset($_GET['vehicleId']) ? intval($_GET['vehicleId']) : null;
 
@@ -37,13 +49,14 @@ if ($vehicleId) {
     if (!$vehicle) {
         echo json_encode(["status" => "false", "message" => "Vehicle not found."]);
     } else {
+        $vehicle = formatVehicleData($vehicle, $baseUrl);
         echo json_encode(["status" => "true", "message" => "Vehicle details fetched successfully.", "data" => $vehicle]);
     }
 } else {
     // Fetch all vehicles
     $vehicles = [];
     while ($row = mysqli_fetch_assoc($result)) {
-        $vehicles[] = $row;
+        $vehicles[] = formatVehicleData($row, $baseUrl);
     }
 
     if (empty($vehicles)) {
