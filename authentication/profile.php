@@ -9,14 +9,14 @@ try {
     $email = $user->email;
     $role = $user->role;
 
-    $table = ($role === "driver") ? "drivers" : "renters";
+    $table = ($role === "drivers") ? "drivers" : "renters";
 
-    $query = "SELECT name, email, mobile_number FROM $table WHERE email = ?";
+    $query = "SELECT * FROM $table WHERE email = ?";
     $stmt = mysqli_prepare($conn, $query);
     mysqli_stmt_bind_param($stmt, "s", $email);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
-
+    
     if ($row = mysqli_fetch_assoc($result)) {
         echo json_encode([
             "status" => "true",
