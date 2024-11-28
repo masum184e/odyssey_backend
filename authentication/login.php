@@ -18,9 +18,9 @@
     $email = $inputData['email'];
     $password = $inputData['password'];
 
-    $query = "SELECT 'drivers' AS role, password FROM drivers WHERE email = ?
+    $query = "SELECT 'driver' AS role, password FROM drivers WHERE email = ?
               UNION 
-              SELECT 'renters' AS role, password FROM renters WHERE email = ?";
+              SELECT 'renter' AS role, password FROM renters WHERE email = ?";
     $stmt = mysqli_prepare($conn, $query);
     mysqli_stmt_bind_param($stmt, "ss", $email, $email);
     mysqli_stmt_execute($stmt);
