@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 require './../database_connection.php';
 require './../config.php';
 
-$baseUrl = "http://30.0.2.112/odyssey_backend/uploads/vehicles/"; // Base URL for images
+$baseUrl = "http://192.168.0.101/odyssey_backend/uploads/vehicles/"; // Base URL for images
 
 function formatVehicleData($vehicle, $baseUrl) {
     // Append the base URL to image paths
@@ -26,7 +26,8 @@ if ($vehicleId !== null && $vehicleId <= 0) {
 
 if ($vehicleId) {
     // Fetch a specific vehicle
-    $query = "SELECT * FROM vehicles WHERE vehicle_id = ?";
+    // $query = "SELECT * FROM vehicles WHERE vehicle_id = ?";
+    $query = "SELECT v.*, d.name, d.mobile_number, d.email FROM vehicles v LEFT JOIN drivers d ON v.driver_id = d.driver_id WHERE v.vehicle_id = ? ";
     $stmt = mysqli_prepare($conn, $query);
     mysqli_stmt_bind_param($stmt, "i", $vehicleId);
 } else {
