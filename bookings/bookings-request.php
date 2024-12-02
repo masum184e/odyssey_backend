@@ -1,4 +1,4 @@
-<?php
+b<?php
 
 header('Content-Type: application/json');
 require './../database_connection.php';
@@ -10,8 +10,13 @@ $email = $user->email;
 $role = $user->role;
 
 // Check if the user is authorized and the request method is POST
-if ($_SERVER["REQUEST_METHOD"] !== "POST" || $role !== "renter") {
-    echo json_encode(["status" => "false", "message" => "Unauthorized access or invalid request method."]);
+if ($_SERVER["REQUEST_METHOD"] !== "POST"){
+    echo json_encode(["status" => "false", "message" => "Invalid request method."]);
+    exit;
+}
+
+if ($role !== "renter") {
+    echo json_encode(["status" => "false", "message" => "Unauthorized access"]);
     exit;
 }
 
@@ -58,9 +63,64 @@ if (!is_numeric($numberOfPassengers) || !is_numeric($numberOfStoppages)) {
     exit;
 }
 
+// Validate if the booking dates are in the future
+$currentTimestamp = time();
+$pickupTimestamp = strtotime($pickupDatetime);
+$dropoffTimestamp = strtotime($dropoffDatetime);
+
+// Calculate the maximum allowed pickup date (7 days from now)
+$maxPickupTimestamp = strtotime("+7 days");
+
+// Validate that the pickup date is within the next 7 days
+if ($pickupTimestamp < $currentTimestamp || $pickupTimestamp > $maxPickupTimestamp) {
+    echo json_encode([
+        "status" => "false",
+        "message" => "Pickup datetime must be within the next 7 days."
+    ]);
+    exit;
+}
+
+if ($pickupTimestamp < $currentTimestamp) {
+    echo json_encode(["status" => "false", "message" => "Pickup datetime must be in the future."]);
+    exit;
+}
+
+if ($dropoffTimestamp < $currentTimestamp) {
+    echo json_encode(["status" => "false", "message" => "Dropoff datetime must be in the future."]);
+    exit;
+}
+
 // Validate date range
-if (strtotime($dropoffDatetime) <= strtotime($pickupDatetime)) {
+if ($dropoffTimestamp <= $pickupTimestamp) {
     echo json_encode(["status" => "false", "message" => "Dropoff datetime must be later than the pickup datetime."]);
+    exit;
+}
+
+// Validate the range between pickup and dropoff
+$maxDurationInSeconds = 7 * 24 * 60 * 60; // 7 days in seconds
+if (($dropoffTimestamp - $pickupTimestamp) > $maxDurationInSeconds) {
+    echo json_encode([
+        "status" => "false", 
+        "message" => "The range between pickup and dropoff must not exceed 7 days."
+    ]);
+    exit;
+}
+
+$query = "SELECT booking_id FROM bookings 
+          WHERE renter_id = ? 
+          AND (
+              (pickup_datetime <= NOW() AND dropoff_datetime >= NOW()) -- Ongoing booking
+              OR 
+              (pickup_datetime > NOW()) -- Upcoming booking
+          )";
+        //   MAKE CHANGES FOR BOOKING STATUS
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $renterId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    echo json_encode(["status" => "false", "message" => "You already have an ongoing or upcoming booking."]);
     exit;
 }
 
