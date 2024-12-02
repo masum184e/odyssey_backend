@@ -9,7 +9,7 @@ try {
     $email = $user->email;
     $role = $user->role;
 
-    $table = ($role === "drivers") ? "drivers" : "renters";
+    $table = ($role === "driver") ? "drivers" : "renters";
 
     $query = "SELECT * FROM $table WHERE email = ?";
     $stmt = mysqli_prepare($conn, $query);
