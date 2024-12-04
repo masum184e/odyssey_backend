@@ -46,6 +46,7 @@
             "status" => "true",
             "message" => "Login successful.",
             "token" => $token,
+            "role" => $role
         ]);
     } catch (Exception $e) {
         echo json_encode(["status" => "false", "message" => "Error generating token."]);
