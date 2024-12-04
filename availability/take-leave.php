@@ -106,7 +106,7 @@ foreach ($dates as $availableDate) {
 }
 
 mysqli_stmt_close($checkStmt);
-mysqli_stmt_close($insertStmt);
+// mysqli_stmt_close($insertStmt);
 mysqli_close($conn);
 
 echo json_encode(["status" => "true", "message" => "Dates added successfully."]);
