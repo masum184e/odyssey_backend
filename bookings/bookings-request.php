@@ -133,7 +133,7 @@ $stmt = $conn->prepare($query);
 $stmt->bind_param("iissssii", $driverId, $renterId, $pickupDatetime, $dropoffDatetime, $pickupLocation, $dropoffLocation, $numberOfPassengers, $numberOfStoppages);
 
 if ($stmt->execute()) {
-    echo json_encode(["status" => "true", "message" => "Booking request created successfully."]);
+    echo json_encode(["status" => "true", "message" => "Booking request send successfully."]);
 } else {
     echo json_encode(["status" => "false", "message" => "Failed to create booking request: " . $stmt->error]);
 }
