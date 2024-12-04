@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 require './../database_connection.php';
 require './../config.php';
 
-$baseUrl = "http://192.168.0.101/odyssey_backend/uploads/vehicles/"; // Base URL for images
+$baseUrl = "http://" . SERVER_IP . "/odyssey_backend/uploads/vehicles/";
 
 function formatVehicleData($vehicle, $baseUrl) {
     // Append the base URL to image paths

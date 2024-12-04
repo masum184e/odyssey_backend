@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
 // Validate required fields
 if (!isset($request['new_password']) || empty($request['new_password'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Password field is required.']);
+    echo json_encode(['status' => 'false', 'message' => 'Password field is required.']);
     exit;
 }
 
@@ -25,7 +25,7 @@ $newPassword = trim($request['new_password']);
 
 // Validate password length
 if (strlen($newPassword) < 6) {
-    echo json_encode(['status' => 'error', 'message' => 'Password must be at least 6 characters long.']);
+    echo json_encode(['status' => 'false', 'message' => 'Password must be at least 6 characters long.']);
     exit;
 }
 
