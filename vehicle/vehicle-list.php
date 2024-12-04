@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 require './../database_connection.php';
 require './../config.php';
 
-$baseUrl = "http://" . SERVER_IP . "/odyssey_backend/uploads/vehicles/";
+$baseUrl = "http://" . SERVER_IP . "/odyssey_backend/uploads/vehicles/"; 
 
 function formatVehicleData($vehicle, $baseUrl) {
     // Append the base URL to image paths
@@ -25,9 +25,20 @@ if ($vehicleId !== null && $vehicleId <= 0) {
 }
 
 if ($vehicleId) {
-    // Fetch a specific vehicle
-    // $query = "SELECT * FROM vehicles WHERE vehicle_id = ?";
-    $query = "SELECT v.*, d.name, d.mobile_number, d.email FROM vehicles v LEFT JOIN drivers d ON v.driver_id = d.driver_id WHERE v.vehicle_id = ? ";
+    $query = "SELECT 
+    v.*, 
+    d.name, 
+    d.mobile_number, 
+    d.email, 
+    GROUP_CONCAT(a.date ORDER BY a.date) AS dates
+    FROM 
+    vehicles v 
+    LEFT JOIN drivers d ON v.driver_id = d.driver_id
+    LEFT JOIN availability a ON d.driver_id = a.driver_id
+    WHERE v.vehicle_id = ?
+    GROUP BY v.vehicle_id, v.driver_id";
+    $stmt = mysqli_prepare($conn, $query);
+    mysqli_stmt_bind_param($stmt, "i", $vehicleId);
     $stmt = mysqli_prepare($conn, $query);
     mysqli_stmt_bind_param($stmt, "i", $vehicleId);
 } else {
@@ -50,6 +61,7 @@ if ($vehicleId) {
     if (!$vehicle) {
         echo json_encode(["status" => "false", "message" => "Vehicle not found."]);
     } else {
+        $vehicle['dates'] = explode(',', $vehicle['dates']);
         $vehicle = formatVehicleData($vehicle, $baseUrl);
         echo json_encode(["status" => "true", "message" => "Vehicle details fetched successfully.", "data" => $vehicle]);
     }
