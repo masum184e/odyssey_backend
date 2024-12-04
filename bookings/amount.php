@@ -11,7 +11,7 @@ $email = $user->email;
 $role = $user->role;
 
 // Check if the user is authorized and the request method is GET
-if ($_SERVER["REQUEST_METHOD"] !== "GET"){
+if ($_SERVER["REQUEST_METHOD"] !== "POST"){
     echo json_encode(["status" => "false", "message" => "Invalid request."]);
     exit;
 }
@@ -33,31 +33,20 @@ if (!in_array($role, ["driver", "renter"])) {
 }
 
 $query = "SELECT 
-    b.booking_id,
     d.driver_id,
     v.vehicle_id,
     p.type,
     p.base_price,
     p.per_km_cost,
-    p.per_hour_cost,
-    b.pickup_location,
-    b.dropoff_location,
-    b.pickup_datetime,
-    b.dropoff_datetime
+    p.per_hour_cost
 FROM
-    bookings b
-JOIN
-    drivers d ON b.driver_id = d.driver_id
+    drivers d
 JOIN
     vehicles v ON d.driver_id = v.driver_id
 JOIN
     packages p ON v.type = p.type
 WHERE
-    d.driver_id = ? 
-    AND b.pickup_datetime = ? 
-    AND b.dropoff_datetime = ? 
-    AND b.pickup_location = ? 
-    AND b.dropoff_location = ?";
+    d.driver_id = ?;";
 
 $stmt = mysqli_prepare($conn, $query);
 if (!$stmt) {
@@ -67,12 +56,8 @@ if (!$stmt) {
 
 mysqli_stmt_bind_param(
     $stmt,
-    "sssss",
+    "s",
     $inputData['driver_id'],
-    $inputData['pickup_datetime'], 
-    $inputData['dropoff_datetime'],
-    $inputData['pickup_location'],
-    $inputData['dropoff_location']
 );
 
 mysqli_stmt_execute($stmt);
@@ -81,8 +66,8 @@ $result = mysqli_stmt_get_result($stmt);
 if (mysqli_num_rows($result) > 0) {
     $bookingData = mysqli_fetch_assoc($result);
 
-    $pickupLocation = $bookingData['pickup_location'];
-    $dropoffLocation = $bookingData['dropoff_location'];
+    $pickupLocation = $inputData['pickup_location'];
+    $dropoffLocation = $inputData['dropoff_location'];
 
     preg_match('/lat\/lng: \(([^,]+),([^)]+)\)/', $pickupLocation, $pickupMatches);
     if (!$pickupMatches) {
@@ -116,8 +101,8 @@ if (mysqli_num_rows($result) > 0) {
 
     $distance = $earthRadius * $c;
 
-    $pickup_time = strtotime($bookingData['pickup_datetime']);
-    $dropoff_time = strtotime($bookingData['dropoff_datetime']);
+    $pickup_time = strtotime($inputData['pickup_datetime']);
+    $dropoff_time = strtotime($inputData['dropoff_datetime']);
     $duration_in_seconds = $dropoff_time - $pickup_time;
     $duration = $duration_in_seconds / 3600;
 
@@ -128,12 +113,10 @@ if (mysqli_num_rows($result) > 0) {
     $totalPrice = $basePrice + ($distance * $perKmCost) + ($duration * $perHrCost);
 
     $response = [
-        'distance' => number_format($distance, 2),
-        'duration' => number_format($duration, 2),
-        'total_price' => number_format($totalPrice, 2)
+
     ];
 
-    echo json_encode(["status" => "true", "message" => "Data fetched successfully", "data" => $response]);
+    echo json_encode(["status" => "true", "message" => "Data fetched successfully", 'distance' => number_format($distance, 2),'duration' => number_format($duration, 2), 'total_price' => number_format($totalPrice, 2)]);
 } else {
     echo json_encode(["status" => "false", "message" => "Driver not found."]);
 }
