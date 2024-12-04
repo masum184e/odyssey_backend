@@ -11,8 +11,19 @@ $email = $user->email;
 $role = $user->role;
 
 // Check if the user is authorized and the request method is GET
-if ($_SERVER["REQUEST_METHOD"] !== "GET" || !isset($_GET['bookingId'])) {
-    echo json_encode(["status" => "false", "message" => "Invalid request method or missing bookingId. Only GET is allowed."]);
+if ($_SERVER["REQUEST_METHOD"] !== "GET"){
+    echo json_encode(["status" => "false", "message" => "Invalid request."]);
+    exit;
+}
+
+$inputData = json_decode(file_get_contents('php://input'), true);
+if (!$inputData) {
+    echo json_encode(["status" => "false", "message" => "Invalid input."]);
+    exit;
+}
+
+if(!isset($inputData['driver_id']) || !isset($inputData['pickup_datetime']) || !isset($inputData['dropoff_datetime']) || !isset($inputData['pickup_location']) || !isset($inputData['dropoff_location'])){
+    echo json_encode(["status" => "false", "message" => "All fields are required"]);
     exit;
 }
 
@@ -21,20 +32,6 @@ if (!in_array($role, ["driver", "renter"])) {
     exit;
 }
 
-// Query to fetch booking details
-$query = "SELECT * FROM bookings WHERE booking_id = ?";
-$stmt = mysqli_prepare($conn, $query);
-mysqli_stmt_bind_param($stmt, "i", $_GET['bookingId']);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$userData = mysqli_fetch_assoc($result);
-
-if (!$userData) {
-    echo json_encode(["status" => "false", "message" => "Booking not found."]);
-    exit;
-}
-
-// Fetch booking, vehicle, driver, and package details
 $query = "SELECT 
     b.booking_id,
     d.driver_id,
@@ -56,7 +53,11 @@ JOIN
 JOIN
     packages p ON v.type = p.type
 WHERE
-    b.booking_id = ?";
+    d.driver_id = ? 
+    AND b.pickup_datetime = ? 
+    AND b.dropoff_datetime = ? 
+    AND b.pickup_location = ? 
+    AND b.dropoff_location = ?";
 
 $stmt = mysqli_prepare($conn, $query);
 if (!$stmt) {
@@ -64,7 +65,16 @@ if (!$stmt) {
     exit;
 }
 
-mysqli_stmt_bind_param($stmt, "i", $_GET['bookingId']);
+mysqli_stmt_bind_param(
+    $stmt,
+    "sssss",
+    $inputData['driver_id'],
+    $inputData['pickup_datetime'], 
+    $inputData['dropoff_datetime'],
+    $inputData['pickup_location'],
+    $inputData['dropoff_location']
+);
+
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
@@ -125,9 +135,10 @@ if (mysqli_num_rows($result) > 0) {
 
     echo json_encode(["status" => "true", "message" => "Data fetched successfully", "data" => $response]);
 } else {
-    echo json_encode(["status" => "false", "message" => "Booking not found."]);
+    echo json_encode(["status" => "false", "message" => "Driver not found."]);
 }
 
+// Close statement and connection
 mysqli_stmt_close($stmt);
 mysqli_close($conn);
 
