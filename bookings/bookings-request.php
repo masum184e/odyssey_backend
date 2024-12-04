@@ -1,4 +1,4 @@
-b<?php
+<?php
 
 header('Content-Type: application/json');
 require './../database_connection.php';

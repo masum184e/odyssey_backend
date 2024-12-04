@@ -48,15 +48,39 @@ if ($bookingId !== null && $bookingId <= 0) {
 }
 
 if ($bookingId) {
-    // Fetch a specific booking
-    $query = "SELECT * FROM bookings WHERE booking_id = ? AND (driver_id = ? OR renter_id = ?)";
+    if ($role === "renter") {
+        // Fetch driver name if the role is renter
+        $query = "SELECT b.*, d.name 
+                  FROM bookings b
+                  LEFT JOIN drivers d ON b.driver_id = d.driver_id
+                  WHERE b.booking_id = ? AND b.renter_id = ?";
+    } else {
+        // Fetch renter name if the role is driver
+        $query = "SELECT b.*, r.name 
+                  FROM bookings b
+                  LEFT JOIN renters r ON b.renter_id = r.renter_id
+                  WHERE b.booking_id = ? AND b.driver_id = ?";
+    }
+
     $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "iii", $bookingId, $userId, $userId);
+    mysqli_stmt_bind_param($stmt, "ii", $bookingId, $userId);
 } else {
     // Fetch all bookings for the authorized user
-    $query = "SELECT * FROM bookings WHERE (driver_id = ? OR renter_id = ?)";
+    if ($role === "renter") {
+        // Fetch driver name if the role is renter
+        $query = "SELECT b.*, d.name 
+                  FROM bookings b
+                  LEFT JOIN drivers d ON b.driver_id = d.driver_id
+                  WHERE b.renter_id = ?";
+    } else {
+        // Fetch renter name if the role is driver
+        $query = "SELECT b.*, r.name 
+                  FROM bookings b
+                  LEFT JOIN renters r ON b.renter_id = r.renter_id
+                  WHERE b.driver_id = ?";
+    }
     $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "ii", $userId, $userId);
+    mysqli_stmt_bind_param($stmt, "i", $userId);
 }
 
 if (!$stmt) {
