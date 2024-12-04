@@ -28,10 +28,10 @@ if (!$row) {
 $driverId = $row['driver_id'];
 
 $today = date('Y-m-d');
-
-$query = "SELECT date FROM availability WHERE driver_id = ? AND date >= ?";
+$nextSevenDays = date('Y-m-d', strtotime('+7 days'));
+$query = "SELECT date FROM availability WHERE driver_id = ? AND date >= ? AND date <= ?";
 $stmt = mysqli_prepare($conn, $query);
-mysqli_stmt_bind_param($stmt, "is", $driverId, $today);
+mysqli_stmt_bind_param($stmt, "iss", $driverId, $today, $nextSevenDays);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
