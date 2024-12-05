@@ -36,14 +36,12 @@
     $bookingId = $inputData['booking_id'];
     $newStatus = $inputData['new_status'];
 
-    // Validate the new status (optional)
-    $validStatuses = ['pending', 'progress', 'completed', 'cancelled']; // Example statuses
+    $validStatuses = ['pending', 'progress', 'paid', 'cancelled'];
     if (!in_array($newStatus, $validStatuses)) {
         echo json_encode(["status" => "false", "message" => "Invalid status."]);
         exit;
     }
 
-    // Update the booking status
     $updateQuery = "UPDATE bookings SET booking_status = ? WHERE booking_id = ? AND driver_id = ?";
     $updateStmt = mysqli_prepare($conn, $updateQuery);
     mysqli_stmt_bind_param($updateStmt, "sii", $newStatus, $bookingId, $driverId);

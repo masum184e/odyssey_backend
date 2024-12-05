@@ -119,9 +119,9 @@ if (mysqli_num_rows($result) > 0) {
     $post_data['total_amount'] = $totalPrice;
     $post_data['currency'] = "BDT";
     $post_data['tran_id'] = "SSLCZ_TEST_" . uniqid();
-    $post_data['success_url'] = "http://" . SERVER_IP . "/odyssey_backend/pay/new_sslcz_gw/success.php";
-    $post_data['fail_url'] = "http://" . SERVER_IP . "/odyssey_backend/pay/new_sslcz_gw/fail.php";
-    $post_data['cancel_url'] = "http://" . SERVER_IP . "/pay/odyssey_backend/new_sslcz_gw/cancel.php";
+    $post_data['success_url'] = "http://" . SERVER_IP . "/odyssey_backend/payment/success.php?bookingId=".$inputData['booking_id']."&&tranId=".$post_data['tran_id']."&&amount=".$post_data['total_amount'];
+    $post_data['fail_url'] = "http://" . SERVER_IP . "/odyssey_backend/payment/fail.php";
+    $post_data['cancel_url'] = "http://" . SERVER_IP . "/payment/odyssey_backend/cancel.php";
 
     $post_data['emi_option'] = '1';
     $post_data['cus_name'] = 'Odyssey User';
